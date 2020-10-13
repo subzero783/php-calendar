@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>PHP Calendar</title>
+    <!-- <link rel="stylesheet" href="./dist/css/style.css"> -->
+  </head>
+  <body class="" style="background:lightgray;">
+    <div class="container my-auto mx-auto d-block">
+      <div class="row">
+        <div class="col-xl-12">
+          <div id="the_calendar"></div>
+        </div>
+      </div>
+      <form id="calendar" class="mt-5 mb-5" action="./calendar/">
+        <div class="row mb-4">
+          <div class="col-xl-12">
+          </div>
+        <div>
+      </form>
+    </div>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script>
+    
+      function getMonthFromString(mon){
+
+        var d = Date.parse(mon + "1, 2012");
+        if(!isNaN(d)){
+          return new Date(d).getMonth() + 1;
+        }
+        return -1;
+      }
+
+      function get_previous_month(){
+
+        $(document).on('click', '.previous_month', function(e){
+
+          e.preventDefault();
+          
+          theMonth =  getMonthFromString($(this).next('.c_month').html()) - 1;
+          theYear =  parseInt($(this).next().next('.c_year').html());
+          
+          if(theMonth === 0){
+            var nextMonth = 11
+            var nextYear = theYear - 1
+            the_date = new Date(nextYear, nextMonth, 1);
+          }else{
+            the_date = new Date(theYear, theMonth-1, 1);
+          }
+          get_month(the_date);
+        });
+
+      }
+
+      function get_next_month(){
+
+        $(document).on('click', '.next_month', function(e){
+          e.preventDefault();
+          
+          theMonth =  getMonthFromString($(this).prev().prev('.c_month').html()) - 1;
+          theYear =  parseInt($(this) .prev('.c_year').html());
+          
+          if(theMonth === 11){
+            var nextMonth = 0
+            var nextYear = theYear + 1
+            the_date = new Date(nextYear, nextMonth, 1);
+          }else{
+            the_date = new Date(theYear, theMonth+1, 1);
+          }
+          get_month(the_date);
+        });
+
+      }
+
+      function get_month(the_date=null){
+
+        var theMonth = null;
+        var theYear = null;
+
+        if(the_date === null){
+          the_date = new Date();
+        }
+    
+        the_date = JSON.stringify(the_date);
+
+        $.ajax({
+          type: 'POST',
+          url: 'http://localhost/php-calendar/calendar/',
+          dataType: 'json',
+          cache: false,
+          data: {
+            action: 'get_month',
+            the_date: the_date,
+          }
+        })          
+        .done(function(response){
+
+          $('#the_calendar').empty();
+          $('#the_calendar').html( response );
+
+        }) 
+        .fail(function(error){
+          console.log('Error: ');
+          console.log(error);
+        });
+      }
+
+      jQuery(document).ready(function($){
+
+        get_previous_month();
+
+        get_next_month()
+
+        get_month();
+
+        function calendar_day_clicked(){
+          $(document).on('click', 'td.day>a', function(e){
+            e.preventDefault();
+            alert($(this).attr('rel'));
+          })
+        }
+        calendar_day_clicked();
+
+        function get_a_day_time_slots( day ){
+          // var formDataJson = toJSONString(document.getElementById("job_search_form"));
+
+          var the_date = new Date();
+
+          // var userDateTimeObj = {
+          //   "user_datetime" : new_date
+          // };
+
+          // console.log(userDateTimeObj);
+
+
+          var theDay = JSON.stringify(the_date);
+
+          console.log(theDay);
+
+          $.ajax({ 
+            type: 'POST', 
+            url: 'http://localhost/php-google-calendar/calendar/',
+            dataType: 'json',
+            cache: false,
+            data: {
+              action: 'get_a_day_time_slots',
+              the_date: theDay
+            }
+          })
+          .done(function(response){
+            console.log('Success: ');
+            console.log(response);
+          }) 
+          .fail(function(error){
+            console.log('Error: ');
+            console.log(error);
+          });
+
+        }
+
+      });
+    </script>
+    <!-- <script src="./dist/js/all.js"></script> -->
+  </body>
+</html>
