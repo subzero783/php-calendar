@@ -155,6 +155,22 @@ if($_POST['action'] == 'get_month'){
   echo json_encode($the_calendar);
 }
 
+if( $_GET['action'] == 'get_day_available_time_slots' ){
+
+  $day_selected = json_decode($_GET['day_selected']);
+  // $day_selected = '2020-10-21';
+  $next_day = date('Y-m-d', strtotime($day_selected . ' +1 day'));
+  $sql = "SELECT * FROM second_appointment WHERE start_datetime >= '$day_selected' AND start_datetime < '$next_day'";
+  
+  $result = $db->query($sql);
+  $row = $result->fetch_all();
+  $result->free();
+  echo json_encode($row);
+  // print_r($row);
+
+}
+
+
 
 // $sql = 'SELECT * FROM second_appointment';
 

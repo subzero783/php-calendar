@@ -5,12 +5,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>PHP Calendar</title>
     <!-- <link rel="stylesheet" href="./dist/css/style.css"> -->
+    <style>
+      body {
+        background-color: #000 !important;
+      }
+      table, 
+      table a{
+        color: #fff;
+      }
+    </style>
   </head>
-  <body class="" style="background:lightgray;">
+  <body class="">
     <div class="container my-auto mx-auto d-block">
       <div class="row">
-        <div class="col-xl-12">
+        <div class="col-xl-12 align-center">
           <div id="the_calendar"></div>
+          <div id="day_available_time_slots"></div>
         </div>
       </div>
       <form id="calendar" class="mt-5 mb-5" action="./calendar/">
@@ -22,6 +32,39 @@
     </div>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script>
+
+      function get_day_available_time_slots(){
+
+        $(document).on('click', 'td.day>a', function(e){
+
+          e.preventDefault();
+
+          var the_date = JSON.stringify($(this).attr('rel'));
+          
+
+          $.ajax({
+          type: 'GET',
+          url: 'http://localhost/php-calendar/calendar/',
+          dataType: 'json',
+          cache: false,
+          data: {
+            action: 'get_day_available_time_slots',
+            day_selected: the_date
+          }
+        })          
+        .done(function(response){
+
+          console.log(response);
+          $('#day_available_time_slots').empty();
+          $('#day_available_time_slots').html( response );
+
+        }) 
+        .fail(function(error){
+          console.log('Error: ');
+          console.log(error);
+        });
+        })
+      }
     
       function getMonthFromString(mon){
 
@@ -114,50 +157,8 @@
 
         get_month();
 
-        function calendar_day_clicked(){
-          $(document).on('click', 'td.day>a', function(e){
-            e.preventDefault();
-            alert($(this).attr('rel'));
-          })
-        }
-        calendar_day_clicked();
+        get_day_available_time_slots();
 
-        function get_a_day_time_slots( day ){
-          // var formDataJson = toJSONString(document.getElementById("job_search_form"));
-
-          var the_date = new Date();
-
-          // var userDateTimeObj = {
-          //   "user_datetime" : new_date
-          // };
-
-          // console.log(userDateTimeObj);
-
-
-          var theDay = JSON.stringify(the_date);
-
-          console.log(theDay);
-
-          $.ajax({ 
-            type: 'POST', 
-            url: 'http://localhost/php-google-calendar/calendar/',
-            dataType: 'json',
-            cache: false,
-            data: {
-              action: 'get_a_day_time_slots',
-              the_date: theDay
-            }
-          })
-          .done(function(response){
-            console.log('Success: ');
-            console.log(response);
-          }) 
-          .fail(function(error){
-            console.log('Error: ');
-            console.log(error);
-          });
-
-        }
 
       });
     </script>
